@@ -12,6 +12,11 @@
 			line {
 			    stroke: black;
 			}
+
+			g.axis text {
+				font-family: helvetiva, arial, sans-serif;
+				font-size: 12px;
+			}
 		</style>
 		<script type="text/javascript" charset="utf-8" src="scripts/underscore-1.4.4.js"></script>
 		<script type="text/javascript" charset="utf-8" src="scripts/jquery-2.0.0.js"></script>
@@ -23,11 +28,9 @@
 					lines: [
 
 						function(x) {
-							return 40*Math.sin(x/5);
+							return Math.sin(x/5);
 						}
 					],
-					yMin: -65,
-					yMax: 65,
 					width: $(document).width(),
 					height: $(document).height()
 				});

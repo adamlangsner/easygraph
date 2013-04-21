@@ -1,36 +1,34 @@
 (function(_, d3){
 	var default_options = {
 		width: 640, height: 480,
-		xMin: -50, yMin: -50,
-		xMax: 50, yMax: 50,
+		domain: [-50, 50],
 		lines: [
-			function(x) { return x*2; }
+			function(x) { return x; }
 		]
 	};
 
 	var
 	_proccess_options = function(options) {
+		// extend default options with user options
 		options = _.extend({}, default_options, options || {});
 
-		// if user explicitly set yMax to false, figure it out for them
-		yMax = options.yMax || 
-				_find_max_y(options.lines, [options.xMin, options.xMax]) ||
-				default_options.yMax; 
+		// if user didn't provide a range, figure out the bounds
+		options.range = options.range || _find_range(options.lines, options.domain);
 
 		return options;
 	},
 
 	// loop through lines to find the highest y point
-	_find_max_y = function(lines, range) {
-		return _.reduce(lines, function(max_y, line) {
-			for (var x=range[0]; x <= range[1]; x++) {
-				var y = line(x);
-				if (isNaN(max_y) || y > max_y) {
-					max_y = y;
+	_find_range = function(lines, domain) {
+		return _.map([Math.max, Math.min], function(op) { // get max and min in an array
+			return _.reduce(lines, function(memo, line) { // go thru each line
+				for (var x=domain[0]; x <= domain[1]; x++) { // go thru the entire domain
+					var y = line(x);
+					memo = isNaN(memo) ? y : op(y, memo); // apply operator (min/max) to y
 				}
-			}
-			return max_y;
-		}, NaN);
+				return memo;
+			}, NaN);
+		});
 	};
 	
 	d3.selection.prototype.easygraph = function(options) {
@@ -40,11 +38,8 @@
 		var w = options.width,
 			h = options.height,
 			
-			xMin = options.xMin,
-			xMax = options.xMax,
-			
-			yMin = options.yMin,
-			yMax = options.yMax,
+			domain = options.domain,
+			range = options.range,
 
 			lines = options.lines;
 
@@ -62,12 +57,12 @@
 
         // create mapping for x axis from input units to pixels
         var x = d3.scale.linear()
-        	.domain([xMin, xMax])
+        	.domain(domain)
         	.range([0, w]),
 
         // create mapping for y axis from input units to pixels
         	y = d3.scale.linear()
-        	.domain([yMin, yMax])
+        	.domain(range)
         	.range([h, 0]);
 
        	// create containers
@@ -92,7 +87,6 @@
 			.tickFormat(function(y) { return y; });
 
 		// adde axes to graph
-		console.log(x(0));
 		var axisContainer = svg.select('g.axis-container');
 		axisContainer.append('g')
 			.attr("transform", "translate(0,"+y(0)+")")

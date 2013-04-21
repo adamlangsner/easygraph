@@ -5,7 +5,9 @@
 		lines: [
 			function(x) { return x; }
 		]
-	};
+	},
+
+	TICK_SPACE = 5;
 
 	var
 	_proccess_options = function(options) {
@@ -67,12 +69,12 @@
 
        	// create containers
         svg.selectAll('g.container')
-	        .data(['axis-container', 'line-container'])
+        	// these are in order in terms of vertical layering, rightmost is on top
+	        .data(['grid-container', 'axis-container', 'line-container'])
 	        	.enter()
 	        		.append('g')
 	        			.attr('class', function(d) { return d; })
 	        			.attr("clip-path", "url(#innerGraph)");
-
 
 	    // create axes
         var xAxis = d3.svg.axis()
@@ -107,7 +109,10 @@
        	// insert paths into line container
         svg.select('g.line-container').selectAll('path.line')
         	.data(_.map(_.range(lines.length), function() {
-        		return _.range.apply(_, x.domain());
+        		console.log();
+        		var domain = x.domain(),
+        			step =  TICK_SPACE * (domain[1]-domain[0]) / w;
+        		return _.range(domain[0], domain[1] + step,  step);
         	}))
         	.enter()
         		.append('path')
@@ -115,5 +120,24 @@
         		.attr('d', function(d, i) {
         			return lines[i](d);
         		});
+
+        var gridContainer = svg.select('g.grid-container');
+       	gridContainer.selectAll("line.grid-line.y")
+				.data(y.ticks(10))
+				.enter().append("line")
+				.attr("class", "grid-line y")
+				.attr("x1", x.range()[0])
+				.attr("x2", x.range()[1])
+				.attr("y1", y)
+				.attr("y2", y);
+
+		gridContainer.selectAll("line.grid-line.x")
+			.data(x.ticks(25))
+			.enter().append("line")
+			.attr("class", "grid-line x")
+			.attr("x1", x)
+			.attr("x2", x)
+			.attr("y1", y.range()[0])
+			.attr("y2", y.range()[1]);
 	};
 })(_, d3);

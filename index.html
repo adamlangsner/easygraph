@@ -3,6 +3,14 @@
 	<head>
 		<title>EasyGraph</title>
 		<style type="text/css">
+
+			#mainGraph {
+				margin: 50px auto;
+				width: 1000px;
+				height: 480px;
+				border: 1px solid black;
+			}
+
 			path {
 			    stroke: black;
 			    stroke-width: 2;
@@ -17,6 +25,15 @@
 				font-family: helvetiva, arial, sans-serif;
 				font-size: 12px;
 			}
+
+			g.axis path {
+				stroke: gray;
+			}
+
+			line.grid-line {
+				stroke: #e0e0e0;
+			}
+
 		</style>
 		<script type="text/javascript" charset="utf-8" src="scripts/underscore-1.4.4.js"></script>
 		<script type="text/javascript" charset="utf-8" src="scripts/jquery-2.0.0.js"></script>
@@ -25,16 +42,10 @@
 		<script type="text/javascript" charset="utf-8">
 			$(document).ready(function() {
 				d3.select('#mainGraph').easygraph({
-					lines: [
 
-						function(x) {
-							return Math.sin(x/5);
-						}
-					],
-					domain: [-55, 55],
-					range: [-6, 6],
-					width: $(document).width(),
-					height: $(document).height()
+					domain: [-10, 10],
+					range: [-10, 10],
+					width: 1000
 				});
 			});
 		</script>

@@ -1,6 +1,7 @@
 (function(_, d3){
 	var default_options = {
 		width: 640, height: 480,
+		xMin: -50, yMin: -50,
 		xMax: 50, yMax: 50,
 		lines: [
 			function(x) { return x*2; }
@@ -10,10 +11,6 @@
 	var
 	_proccess_options = function(options) {
 		options = _.extend({}, default_options, options || {});
-
-		// hidden harcdoded options (for now)
-		options.yMin = 0;
-		options.xMin = 0;
 
 		// if user explicitly set yMax to false, figure it out for them
 		yMax = options.yMax || 
@@ -73,23 +70,49 @@
         	.domain([yMin, yMax])
         	.range([h, 0]);
 
+       	// create containers
+        svg.selectAll('g.container')
+	        .data(['axis-container', 'line-container'])
+	        	.enter()
+	        		.append('g')
+	        			.attr('class', function(d) { return d; })
+	        			.attr("clip-path", "url(#innerGraph)");
+
+
+	    // create axes
+        var xAxis = d3.svg.axis()
+			.scale(x)
+			.ticks(20)
+			.orient('bottom')
+			.tickFormat(function(x) { return x; }),
+
+			yAxis = d3.svg.axis()
+			.scale(y)
+			.orient('left')
+			.tickFormat(function(y) { return y; });
+
+		// adde axes to graph
+		console.log(x(0));
+		var axisContainer = svg.select('g.axis-container');
+		axisContainer.append('g')
+			.attr("transform", "translate(0,"+y(0)+")")
+			.attr("class", "axis x-axis")
+			.call(xAxis);
+
+		axisContainer.append('g')
+			.attr("transform", "translate("+x(0)+",0)")
+			.attr("class", "axis y-axis")
+			.call(yAxis);
+
         // convert line functions into d3 lines
         lines = _.map(lines, function(line) {		
 			return d3.svg.line()
-	            .x(function(d, i) { return x(i); })
-	            .y(function(d, i) { return y(line(i)); });
+	            .x(function(d, i) { return x(d); })
+	            .y(function(d, i) { return y(line(d)); });
 		});
 
-       	// create group for each line
-        var lineContainer = svg.selectAll('g.line-container')
-            .data([lines])
-        	.enter()
-        		.append('g')
-        			.attr('class', 'line-container')
-        			.attr("clip-path", "url(#innerGraph)");
-
        	// insert paths into line container
-        lineContainer.selectAll('path.line')
+        svg.select('g.line-container').selectAll('path.line')
         	.data(_.map(_.range(lines.length), function() {
         		return _.range.apply(_, x.domain());
         	}))
@@ -99,9 +122,5 @@
         		.attr('d', function(d, i) {
         			return lines[i](d);
         		});
-
-        // lineContainers.each(function(d, i) {
-        // 	d3.select(this).append('path').attr('line').attr('d', d);
-        // });
 	};
 })(_, d3);

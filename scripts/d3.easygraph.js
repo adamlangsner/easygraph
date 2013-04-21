@@ -77,7 +77,6 @@
 	    // create axes
         var xAxis = d3.svg.axis()
 			.scale(x)
-			.ticks(20)
 			.orient('bottom')
 			.tickFormat(function(x) { return x; }),
 
